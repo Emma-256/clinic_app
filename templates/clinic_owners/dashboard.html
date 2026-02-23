@@ -22,12 +22,6 @@
         <p>Here's what's happening across your clinics today.</p>
         <div class="dash-hero-date" id="dashDate"></div>
       </div>
-      {% comment %} <a href="{{ register_clinic_url }}" class="btn-register">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        Register New Clinic
-      </a> {% endcomment %}
     </div>
   </div>
 
@@ -187,6 +181,9 @@
       <div class="dash-card" style="animation-delay:.1s">
         <div class="dash-card-header">
           <h2><span class="dash-card-header-icon">👥</span> Human Resources</h2>
+        <a href="{% url 'staff:register_staff' %}" class="btn-primary-teal" style="padding:8px 16px;font-size:.78rem;">
+          + Add Staff
+        </a>
         </div>
         <div class="dash-card-body">
 

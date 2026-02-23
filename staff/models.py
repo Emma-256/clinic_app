@@ -45,16 +45,22 @@ class Staff(models.Model):
         ('off_duty', 'Off Duty'),
     ]
 
+    RELATIONSHIPS = [
+        ('Mother','Mother'),
+        ('Father','Father'),
+        ('Uncle','Uncle'),
+        ('Aunt','Aunt'),
+        ('Gudian','Gudian'),
+
+    ]
+
     # Link to your custom user model
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='staff_profile')
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_staff')
 
-    # Clinic assignment through a join model
-    clinics = models.ManyToManyField(Clinic, through='ClinicStaffAssignment', related_name='assigned_staff')
-
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
                                  message="Phone number must be entered in format: '+999999999'. Up to 15 digits allowed.")
-    phone = models.CharField(validators=[phone_regex], max_length=17)
+  
     date_of_birth = models.DateField()
     national_id = models.CharField(max_length=50, unique=True)
     profile_picture = models.ImageField(upload_to='staff_pics/', blank=True, null=True)
@@ -69,7 +75,7 @@ class Staff(models.Model):
     license_expiry_date = models.DateField(blank=True, null=True)
 
     next_of_kin = models.CharField(max_length=200)
-    nok_relationship = models.CharField(max_length=50)
+    nok_relationship = models.CharField(max_length=50, choices=RELATIONSHIPS)
     nok_phone = models.CharField(validators=[phone_regex], max_length=17)
 
     gross_salary = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])

@@ -30,7 +30,8 @@ urlpatterns = [
     # Log out
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 
-    path('clinics,', include('clinics.urls'))
+    path('clinics', include('clinics.urls')),
+    path('staff', include('staff.urls'))
 ]
 
 

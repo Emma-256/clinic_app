@@ -1,0 +1,365 @@
+{% extends "medi_clinics/base.html" %}
+{% load static %}
+
+{% block title %}Register Staff{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm p-4 my-4" style="max-width:860px;margin:auto;">
+  <h2 class="mb-1">Register Staff Member</h2>
+  <p class="text-muted mb-4">Fill in the details below. The staff member will use the credentials you set to log in.</p>
+
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <!-- ══════════════════════════════
+         SECTION 1 — Account Details
+    ══════════════════════════════ -->
+    <h6 class="text-uppercase text-muted fw-bold border-bottom pb-2 mb-3">
+      <i class="bi bi-person-lock me-1"></i> Account Details
+    </h6>
+    <div class="row g-3 mb-4">
+
+      <div class="col-md-6">
+        <input type="text" name="username" class="form-control {% if form.username.errors %}is-invalid{% endif %}"
+               placeholder="Choose a username" value="{{ form.username.value|default:'' }}">
+        {% if form.username.errors %}
+          <div class="invalid-feedback">{{ form.username.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <input type="text" name="first_name" class="form-control {% if form.first_name.errors %}is-invalid{% endif %}"
+               placeholder="First name" value="{{ form.first_name.value|default:'' }}">
+        {% if form.first_name.errors %}
+          <div class="invalid-feedback">{{ form.first_name.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <input type="text" name="last_name" class="form-control {% if form.last_name.errors %}is-invalid{% endif %}"
+               placeholder="Last name" value="{{ form.last_name.value|default:'' }}">
+        {% if form.last_name.errors %}
+          <div class="invalid-feedback">{{ form.last_name.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <input type="email" name="email" class="form-control {% if form.email.errors %}is-invalid{% endif %}"
+               placeholder="Email address" value="{{ form.email.value|default:'' }}">
+        {% if form.email.errors %}
+          <div class="invalid-feedback">{{ form.email.errors|striptags }}</div>
+        {% endif %}
+      </div>
+      <div class="col-md-6">
+        <input type="tel" name="phone" class="form-control {% if form.phone.errors %}is-invalid{% endif %}"
+               placeholder="+256XXXXXXXXX" value="{{ form.phone.value|default:'' }}">
+        {% if form.phone.errors %}
+          <div class="invalid-feedback">{{ form.phone.errors|striptags }}</div>
+        {% endif %}
+      </div>
+      <div class="col-md-6">
+        <input type="password" name="password1" class="form-control {% if form.password1.errors %}is-invalid{% endif %}"
+               placeholder="Set a password">
+        {% if form.password1.errors %}
+          <div class="invalid-feedback">{{ form.password1.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-12">
+        <input type="password" name="password2" class="form-control {% if form.password2.errors %}is-invalid{% endif %}"
+               placeholder="Confirm password">
+        {% if form.password2.errors %}
+          <div class="invalid-feedback">{{ form.password2.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         SECTION 2 — Personal Info
+    ══════════════════════════════ -->
+    <h6 class="text-uppercase text-muted fw-bold border-bottom pb-2 mb-3">
+      <i class="bi bi-person me-1"></i> Personal Information
+    </h6>
+    <div class="row g-3 mb-4">
+      <div class="col-md-6">
+        <input type="date" name="date_of_birth" class="form-control {% if form.date_of_birth.errors %}is-invalid{% endif %}"
+               value="{{ form.date_of_birth.value|default:'' }}">
+        <small class="text-muted">Date of birth</small>
+        {% if form.date_of_birth.errors %}
+          <div class="invalid-feedback d-block">{{ form.date_of_birth.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <input type="text" name="national_id" class="form-control {% if form.national_id.errors %}is-invalid{% endif %}"
+               placeholder="National ID number" value="{{ form.national_id.value|default:'' }}">
+        {% if form.national_id.errors %}
+          <div class="invalid-feedback">{{ form.national_id.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-12">
+        <input type="file" name="profile_picture" class="form-control" accept="image/*">
+        <small class="text-muted">Profile picture (optional)</small>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         SECTION 3 — Employment
+    ══════════════════════════════ -->
+    <h6 class="text-uppercase text-muted fw-bold border-bottom pb-2 mb-3">
+      <i class="bi bi-briefcase me-1"></i> Employment Details
+    </h6>
+    <div class="row g-3 mb-4">
+
+      <div class="col-md-6">
+        <select name="employment_type" id="id_employment_type"
+                class="form-select {% if form.employment_type.errors %}is-invalid{% endif %}">
+          <option value="">— Select Employment Type —</option>
+          {% for value, label in form.fields.employment_type.choices %}
+            {% if value %}
+              <option value="{{ value }}" {% if form.employment_type.value == value %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endif %}
+          {% endfor %}
+        </select>
+        {% if form.employment_type.errors %}
+          <div class="invalid-feedback">{{ form.employment_type.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Dynamic role dropdown -->
+      <div class="col-md-6">
+        <!-- Placeholder before type is chosen -->
+        <select id="role-placeholder" class="form-select" disabled>
+          <option>— Select employment type first —</option>
+        </select>
+
+        <!-- Technical role (hidden until needed) -->
+        <select name="technical_role" id="id_technical_role"
+                class="form-select {% if form.technical_role.errors %}is-invalid{% endif %}"
+                style="display:none;">
+          <option value="">— Select Technical Role —</option>
+        </select>
+        {% if form.technical_role.errors %}
+          <div class="invalid-feedback d-block">{{ form.technical_role.errors|striptags }}</div>
+        {% endif %}
+
+        <!-- Support role (hidden until needed) -->
+        <select name="support_role" id="id_support_role"
+                class="form-select {% if form.support_role.errors %}is-invalid{% endif %}"
+                style="display:none;">
+          <option value="">— Select Support Role —</option>
+        </select>
+        {% if form.support_role.errors %}
+          <div class="invalid-feedback d-block">{{ form.support_role.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <input type="text" name="registration_number"
+               class="form-control {% if form.registration_number.errors %}is-invalid{% endif %}"
+               placeholder="Professional reg. number (if applicable)"
+               value="{{ form.registration_number.value|default:'' }}">
+        {% if form.registration_number.errors %}
+          <div class="invalid-feedback">{{ form.registration_number.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <input type="date" name="license_expiry_date"
+               class="form-control {% if form.license_expiry_date.errors %}is-invalid{% endif %}"
+               value="{{ form.license_expiry_date.value|default:'' }}">
+        <small class="text-muted">License expiry date (if applicable)</small>
+        {% if form.license_expiry_date.errors %}
+          <div class="invalid-feedback d-block">{{ form.license_expiry_date.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+     {% comment %}  <!-- Clinic assignment -->
+      <div class="col-md-12">
+        <select name="clinic" id="id_clinic" class="form-select" required>
+          <option value="">— Assign to Clinic —</option>
+          {% for clinic in owner_clinics %}
+            <option value="{{ clinic.id }}">{{ clinic.name }}</option>
+          {% endfor %}
+        </select>
+      </div> {% endcomment %}
+
+    </div>
+
+    <!-- ══════════════════════════════
+         SECTION 4 — Next of Kin
+    ══════════════════════════════ -->
+    <h6 class="text-uppercase text-muted fw-bold border-bottom pb-2 mb-3">
+      <i class="bi bi-people me-1"></i> Next of Kin
+    </h6>
+    <div class="row g-3 mb-4">
+
+      <div class="col-md-4">
+        <input type="text" name="next_of_kin"
+               class="form-control {% if form.next_of_kin.errors %}is-invalid{% endif %}"
+               placeholder="Full name" value="{{ form.next_of_kin.value|default:'' }}">
+        {% if form.next_of_kin.errors %}
+          <div class="invalid-feedback">{{ form.next_of_kin.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <select name="nok_relationship"
+                class="form-select {% if form.nok_relationship.errors %}is-invalid{% endif %}">
+          <option value="">— Select Relationship to next_of_kin —</option>
+          {% for value, label in form.fields.nok_relationship.choices %}
+            {% if value %}
+              <option value="{{ value }}" {% if form.nok_relationship.value == value %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endif %}
+          {% endfor %}
+        </select>
+        {% if form.nok_relationship.errors %}
+          <div class="invalid-feedback">{{ form.nok_relationship.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-4">
+        <input type="tel" name="nok_phone"
+               class="form-control {% if form.nok_phone.errors %}is-invalid{% endif %}"
+               placeholder="+256XXXXXXXXX" value="{{ form.nok_phone.value|default:'' }}">
+        {% if form.nok_phone.errors %}
+          <div class="invalid-feedback">{{ form.nok_phone.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════
+         SECTION 5 — Salary & Status
+    ══════════════════════════════ -->
+    <h6 class="text-uppercase text-muted fw-bold border-bottom pb-2 mb-3">
+      <i class="bi bi-cash-coin me-1"></i> Salary & Status
+    </h6>
+    <div class="row g-3 mb-4">
+
+      <div class="col-md-6">
+        <div class="input-group">
+          <span class="input-group-text fw-bold">UGX</span>
+          <input type="number" name="gross_salary" min="0" step="1000"
+                 class="form-control {% if form.gross_salary.errors %}is-invalid{% endif %}"
+                 placeholder="Gross salary" value="{{ form.gross_salary.value|default:'' }}">
+          {% if form.gross_salary.errors %}
+            <div class="invalid-feedback">{{ form.gross_salary.errors|striptags }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="input-group">
+          <span class="input-group-text fw-bold">UGX</span>
+          <input type="number" name="monthly_allowance" min="0" step="1000"
+                 class="form-control {% if form.monthly_allowance.errors %}is-invalid{% endif %}"
+                 placeholder="Monthly allowance" value="{{ form.monthly_allowance.value|default:'' }}">
+          {% if form.monthly_allowance.errors %}
+            <div class="invalid-feedback">{{ form.monthly_allowance.errors|striptags }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <select name="account_status" class="form-select {% if form.account_status.errors %}is-invalid{% endif %}">
+          {% for value, label in form.fields.account_status.choices %}
+            <option value="{{ value }}" {% if form.account_status.value == value %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+        <small class="text-muted">Account status</small>
+        {% if form.account_status.errors %}
+          <div class="invalid-feedback">{{ form.account_status.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <select name="duty_status" class="form-select {% if form.duty_status.errors %}is-invalid{% endif %}">
+          {% for value, label in form.fields.duty_status.choices %}
+            <option value="{{ value }}" {% if form.duty_status.value == value %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+        <small class="text-muted">Duty status</small>
+        {% if form.duty_status.errors %}
+          <div class="invalid-feedback">{{ form.duty_status.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100 py-2">
+      <i class="bi bi-person-plus me-2"></i> Register Staff Member
+    </button>
+
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const typeSelect       = document.getElementById('id_employment_type');
+  const techSelect       = document.getElementById('id_technical_role');
+  const suppSelect       = document.getElementById('id_support_role');
+  const placeholder      = document.getElementById('role-placeholder');
+
+  typeSelect.addEventListener('change', function () {
+    const type = this.value;
+
+    // Reset
+    techSelect.style.display = 'none';
+    suppSelect.style.display = 'none';
+    techSelect.innerHTML = '<option value="">— Select Technical Role —</option>';
+    suppSelect.innerHTML = '<option value="">— Select Support Role —</option>';
+
+    if (!type) {
+      placeholder.style.display = 'block';
+      return;
+    }
+
+    placeholder.style.display = 'none';
+    const activeSelect = type === 'technical' ? techSelect : suppSelect;
+    activeSelect.style.display = 'block';
+    activeSelect.innerHTML = '<option value="">Loading roles...</option>';
+    activeSelect.disabled = true;
+
+    fetch(`/staff/get-roles/?employment_type=${type}`)
+      .then(r => r.json())
+      .then(data => {
+        const label = type === 'technical' ? 'Technical Role' : 'Support Role';
+        activeSelect.innerHTML = `<option value="">— Select ${label} —</option>`;
+        if (data.roles.length === 0) {
+          activeSelect.innerHTML += '<option disabled>No roles found</option>';
+        } else {
+          data.roles.forEach(role => {
+            const opt = document.createElement('option');
+            opt.value = role.id;
+            opt.textContent = role.name;
+            activeSelect.appendChild(opt);
+          });
+        }
+        activeSelect.disabled = false;
+      })
+      .catch(() => {
+        activeSelect.innerHTML = '<option value="">Failed to load — try again</option>';
+        activeSelect.disabled = false;
+      });
+  });
+});
+</script>
+{% endblock %}
