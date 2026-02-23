@@ -10,6 +10,8 @@ __pycache__/
 .venv/
 .env/
 
+# git ignore
+.gitignore
 # Django
 db.sqlite3
 *.log

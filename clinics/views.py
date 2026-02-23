@@ -13,9 +13,9 @@ from .serializers import (
 )
 
 @login_required
-def clinic_create(request, pk):
+def clinic_create(request):
     """Create a new clinic for the logged-in owner"""
-    pk=pk
+    
     if not hasattr(request.user, 'profile') or request.user.profile.user_type != 'owner':
         raise PermissionDenied("Only owners can register clinics.")
 
@@ -27,7 +27,7 @@ def clinic_create(request, pk):
             clinic.save()
             form.save_m2m()
             messages.success(request, 'Clinic created successfully.')
-            return redirect('clinics:clinic_detail', pk=clinic.pk)
+            return redirect('clinics:clinic_detail')
     else:
         form = ClinicForm(owner=request.user)
 
