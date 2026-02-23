@@ -30,7 +30,8 @@ urlpatterns = [
 
         # My Urls
     path('clinic_owners/', include('clinic_owners.urls')),
-    path('clinics/', include('clinics.urls', namespace='clinics'))
+    path('clinics/', include('clinics.urls', namespace='clinics')),
+    path('staff/', include('staff.urls', namespace = 'staff')),
 ]
 
 if settings.DEBUG:
