@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'clinic_owners.apps.ClinicOwnersConfig',
     'staff.apps.StaffConfig',
     'clinics.apps.ClinicsConfig',
+    'inventory.apps.InventoryConfig',
     #Django defaults
     'django.contrib.admin',
     'django.contrib.auth',

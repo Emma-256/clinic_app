@@ -24,6 +24,9 @@ urlpatterns = [  # list all clinics
 
     # api
     path('api/', include(router.urls), name='apis'),
+
+    # inventory url 
+    path('inventory', include('inventory.urls'))
 ]
 
 

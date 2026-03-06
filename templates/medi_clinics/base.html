@@ -1,138 +1,284 @@
 <!-- templates/medi_clinics/base.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" {% if use_sidebar %}data-sidebar="true"{% endif %}>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Medi Clinics{% endblock %}</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <!-- Custom CSS -->
-    {% load static %}
-    {% load crispy_forms_tags %}
-    <link rel="stylesheet" href="{% static 'css/medi_clinics/base.css' %}">
-    <link rel="stylesheet" href="{% static 'css/medi_clinics/home.css' %}">
-    <link rel="stylesheet" href="{% static 'css/clinic_owners/register.css' %}">
-    <link rel="stylesheet" href="{% static 'css/clinic_owners/profile.css' %}">
-    {% block extra_head %}{% endblock %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Medi Clinics{% endblock %}</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  {% load static %}
+  {% load crispy_forms_tags %}
+
+  <!-- Project CSS (existing files — keep these) -->
+  <link rel="stylesheet" href="{% static 'css/medi_clinics/home.css' %}">
+  <link rel="stylesheet" href="{% static 'css/clinic_owners/register.css' %}">
+  <link rel="stylesheet" href="{% static 'css/clinic_owners/profile.css' %}">
+
+  <!-- NEW: base layout styles (replaces the old base.css) -->
+  <link rel="stylesheet" href="{% static 'css/medi_clinics/base.css' %}">
+
+  {% block extra_head %}{% endblock %}
 </head>
-<body class="d-flex flex-column min-vh-100">
-<!-- Modern Professional Navbar -->
-<nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top py-2">
-    <div class="container">
-        <!-- Brand with refined styling -->
-        <a class="navbar-brand fw-bold fs-4" href="{% url 'clinic_owners:dashboard' %}">
-            <i class="bi bi-hospital text-primary me-2"></i>
-            <span class="text-dark">Medi</span><span class="text-primary">Clinics</span>
+
+<body {% if use_sidebar %}data-sidebar="true"{% endif %}>
+
+  <!-- ═══════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════ -->
+  <nav class="mc-navbar">
+
+    <a class="mc-brand" href="{% url 'clinic_owners:dashboard' %}">
+      <div class="mc-brand-icon"><i class="bi bi-hospital"></i></div>
+      <div class="mc-brand-name"><span>Medi</span><span>Clinics</span></div>
+    </a>
+
+    <div class="mc-navbar-spacer"></div>
+
+    {% if user.is_authenticated %}
+      <ul class="mc-nav-links">
+        <li>
+          <a href="{% url 'clinic_owners:dashboard' %}" class="{% block nav_dashboard_class %}{% endblock %}">
+            <i class="bi bi-speedometer2"></i> Dashboard
+          </a>
+        </li>
+      </ul>
+
+      <!-- User pill + dropdown -->
+      <div class="mc-user-wrap">
+        <div class="mc-user-pill" id="userPill">
+          <div class="mc-user-avatar">{{ user.username|slice:":1"|upper }}</div>
+          <span class="mc-user-name">{{ user.username }}</span>
+          <i class="bi bi-chevron-down mc-user-caret"></i>
+        </div>
+        <div class="mc-dropdown" id="userDropdown">
+          <div class="mc-dropdown-header">
+            <div class="mc-dropdown-name">{{ user.get_full_name|default:user.username }}</div>
+            <div class="mc-dropdown-email">{{ user.email }}</div>
+          </div>
+          <a href="{% url 'clinic_owners:profile' %}"><i class="bi bi-person"></i> Profile</a>
+          <a href="#"><i class="bi bi-gear"></i> Settings</a>
+          <div class="mc-dropdown-divider"></div>
+          <form method="post" action="{% url 'clinic_owners:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="mc-dropdown-logout"><i class="bi bi-box-arrow-right"></i> Logout</button>
+          </form>
+        </div>
+      </div>
+
+    {% else %}
+      <ul class="mc-nav-links">
+        <li><a href="{% url 'clinic_owners:login' %}"><i class="bi bi-box-arrow-in-right"></i> Login</a></li>
+        <li><a href="{% url 'clinic_owners:register' %}"><i class="bi bi-person-plus"></i> Register</a></li>
+      </ul>
+    {% endif %}
+
+    <!-- Mobile hamburger -->
+    <button class="mc-hamburger" id="mcHamburger" aria-label="Open menu">
+      <i class="bi bi-list"></i>
+    </button>
+
+  </nav>
+
+  <!-- ═══════════════════════════════════════
+       MOBILE NAV DRAWER
+  ═══════════════════════════════════════ -->
+  <div class="mc-mobile-nav" id="mcMobileNav">
+    <div class="mc-mobile-overlay" id="mcMobileOverlay"></div>
+    <div class="mc-mobile-drawer">
+      <div class="mc-drawer-header">
+        <div class="mc-brand">
+          <div class="mc-brand-icon"><i class="bi bi-hospital"></i></div>
+          <div class="mc-brand-name"><span>Medi</span><span>Clinics</span></div>
+        </div>
+        <button class="mc-mobile-close" id="mcMobileClose" aria-label="Close menu">
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+
+      {% if user.is_authenticated %}
+        <a href="{% url 'clinic_owners:dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="{% url 'clinic_owners:profile' %}"><i class="bi bi-person"></i> Profile</a>
+        <a href="#"><i class="bi bi-gear"></i> Settings</a>
+        {% if use_sidebar %}
+          {% block mobile_sidebar_links %}{% endblock %}
+        {% endif %}
+        <div class="mc-drawer-divider"></div>
+        <form method="post" action="{% url 'clinic_owners:logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="mc-drawer-logout"><i class="bi bi-box-arrow-right"></i> Logout</button>
+        </form>
+      {% else %}
+        <a href="{% url 'clinic_owners:login' %}"><i class="bi bi-box-arrow-in-right"></i> Login</a>
+        <a href="{% url 'clinic_owners:register' %}"><i class="bi bi-person-plus"></i> Register</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       PAGE LAYOUT  (sidebar + main)
+  ═══════════════════════════════════════ -->
+  <div class="mc-page">
+
+    <!-- SIDEBAR — only rendered when view passes use_sidebar=True in context -->
+    {% if use_sidebar %}
+    <aside class="mc-sidebar" id="mcSidebar">
+
+      <div class="sb-toggle">
+        <button class="sb-toggle-btn" id="sbToggleBtn" aria-label="Toggle sidebar">
+          <svg class="icon-collapse" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          <svg class="icon-expand" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+
+     <!--  <div class="sb-brand">
+        <div class="sb-brand-icon"><i class="bi bi-hospital-fill"></i></div>
+        <div class="sb-brand-text">
+          <span class="sb-brand-name">{% block sidebar_clinic_name %}Clinic{% endblock %}</span>
+          <span class="sb-brand-sub">Medi Clinics</span>
+        </div>
+      </div> -->
+
+      <div class="sb-divider"></div>
+
+      <span class="sb-section-label">Quick Actions</span>
+      <nav class="sb-nav">
+
+        <a href="{% block sb_dashboard_url %}#{% endblock %}"
+           class="sb-link {% block sb_dashboard_active %}{% endblock %}"
+           data-tip="Dashboard">
+          <span class="sb-icon"><i class="bi bi-grid-1x2"></i></span>
+          <span class="sb-label">Dashboard</span>
         </a>
 
-        <!-- Mobile toggler -->
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+        <button class="sb-link" data-tip="Add Staff">
+          <span class="sb-icon"><i class="bi bi-person-plus"></i></span>
+          <span class="sb-label">Add Staff</span>
         </button>
 
-        <!-- Navbar links -->
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto align-items-center gap-lg-3">
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link px-3 py-2 rounded-3 fw-medium" href="{% url 'clinic_owners:dashboard' %}">
-                            <i class="bi bi-speedometer2 me-2"></i>Dashboard
-                        </a>
-                    </li>
+        <button class="sb-link" data-tip="Add Item">
+          <span class="sb-icon"><i class="bi bi-plus-square"></i></span>
+          <span class="sb-label">Add Item</span>
+        </button>
 
-                    <!-- User dropdown with modern styling -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center px-3 py-2 rounded-3" 
-                           href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" 
-                           aria-expanded="false">
-                            <i class="bi bi-person-circle me-2 fs-5"></i>
-                            <span class="fw-medium">{{ user.username|default:'Account' }}</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2 rounded-4 p-2" 
-                            aria-labelledby="userDropdown" style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.95);">
-                            <li><a class="dropdown-item rounded-3 py-2" href="{% url 'clinic_owners:profile' %}"><i class="bi bi-person me-2"></i>Profile</a></li>
-                            <li><a class="dropdown-item rounded-3 py-2" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form method="post" action="{% url 'clinic_owners:logout' %}" class="d-inline">
-                                    {% csrf_token %}
-                                    <button type="submit" class="dropdown-item rounded-3 py-2 text-danger">
-                                        <i class="bi bi-box-arrow-right me-2"></i>Logout
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link px-3 py-2 rounded-3 fw-medium" href="{% url 'clinic_owners:login' %}">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Login
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link px-3 py-2 rounded-3 fw-medium" href="{% url 'clinic_owners:register' %}">
-                            <i class="bi bi-person-plus me-2"></i>Register
-                        </a>
-                    </li>
-                {% endif %}
-            </ul>
+        <button class="sb-link" data-tip="New Report">
+          <span class="sb-icon"><i class="bi bi-file-earmark-plus"></i></span>
+          <span class="sb-label">New Report</span>
+        </button>
+
+
+      </nav>
+
+      <div class="sb-divider sb-divider--spaced"></div>
+
+      <span class="sb-section-label">Navigations</span>
+      <nav class="sb-nav">
+        
+        <a href="{% block sb_staff_url %}#{% endblock %}"
+           class="sb-link {% block sb_staff_active %}{% endblock %}"
+           data-tip="Staff">
+          <span class="sb-icon"><i class="bi bi-people"></i></span>
+          <span class="sb-label">Staff</span>
+          <span class="sb-badge">Soon</span>
+        </a>
+
+        <a href="{% block sb_inventory_url %}#{% endblock %}"
+           class="sb-link {% block sb_inventory_active %}{% endblock %}"
+           data-tip="Inventory">
+          <span class="sb-icon"><i class="bi bi-box-seam"></i></span>
+          <span class="sb-label">Inventory</span>
+          <span class="sb-badge">Soon</span>
+        </a>
+
+        <a href="{% block sb_reports_url %}#{% endblock %}"
+           class="sb-link {% block sb_reports_active %}{% endblock %}"
+           data-tip="Reports">
+          <span class="sb-icon"><i class="bi bi-bar-chart-line"></i></span>
+          <span class="sb-label">Reports</span>
+          <span class="sb-badge">Soon</span>
+        </a>
+
+        <a href="{% block sb_profile_url %}#{% endblock %}"
+           class="sb-link {% block sb_profile_active %}{% endblock %}"
+           data-tip="Clinic Profile">
+          <span class="sb-icon"><i class="bi bi-building"></i></span>
+          <span class="sb-label">Clinic Profile</span>
+        </a>
+
+      </nav>
+
+      <div class="sb-spacer"></div>
+      <div class="sb-divider"></div>
+
+      <nav class="sb-nav sb-nav--bottom">
+        <a href="#" class="sb-link" data-tip="All Clinics">
+          <span class="sb-icon"><i class="bi bi-arrow-left-circle"></i></span>
+          <span class="sb-label">All Clinics</span>
+        </a>
+      </nav>
+
+    </aside>
+    {% endif %}
+
+    <!-- MAIN -->
+    <main class="mc-main" id="mcMain">
+
+      {% if messages %}
+      <div class="mc-alerts">
+        {% for message in messages %}
+          <div class="mc-alert mc-alert-{{ message.tags }}">
+            {% if message.tags == 'success' %}<i class="bi bi-check-circle-fill"></i>
+            {% elif message.tags == 'error' or message.tags == 'danger' %}<i class="bi bi-exclamation-triangle-fill"></i>
+            {% elif message.tags == 'warning' %}<i class="bi bi-exclamation-circle-fill"></i>
+            {% else %}<i class="bi bi-info-circle-fill"></i>{% endif %}
+            <span>{{ message }}</span>
+            <button class="mc-alert-close" aria-label="Dismiss"><i class="bi bi-x"></i></button>
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="mc-content">
+        {% block content %}{% endblock %}
+      </div>
+
+      <footer class="mc-footer">
+        <span>&copy; {% now "Y" %} Medi Clinics &mdash; All rights reserved.</span>
+        <div class="mc-footer-links">
+          <a href="#"><i class="bi bi-shield-check"></i> Privacy</a>
+          <a href="#"><i class="bi bi-file-earmark-text"></i> Terms</a>
+          <a href="#"><i class="bi bi-envelope"></i> Contact</a>
         </div>
-    </div>
-</nav>
+      </footer>
 
-    <!-- Main content area with automatic spacing -->
-    <main class="flex-grow-1">
-        <div class="container my-1">
-            <!-- Messages with icons -->
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center" role="alert">
-                        {% if message.tags == 'success' %}
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                        {% elif message.tags == 'error' %}
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        {% elif message.tags == 'warning' %}
-                            <i class="bi bi-exclamation-circle-fill me-2"></i>
-                        {% elif message.tags == 'info' %}
-                            <i class="bi bi-info-circle-fill me-2"></i>
-                        {% endif %}
-                        <div>{{ message }}</div>
-                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-
-            {% block content %}
-            {% endblock %}
-        </div>
     </main>
 
-    <!-- Footer with useful links and copyright -->
-    <footer class="bg-light text-muted py-3 mt-auto border-top">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                    <p class="mb-0">&copy; {% now "Y" %} Medi Clinics. All rights reserved.</p>
-                </div>
-                <div class="col-md-6 text-center text-md-end">
-                    <a href="#" class="text-decoration-none me-3"><i class="bi bi-shield-check"></i> Privacy</a>
-                    <a href="#" class="text-decoration-none me-3"><i class="bi bi-file-earmark-text"></i> Terms</a>
-                    <a href="#" class="text-decoration-none"><i class="bi bi-envelope"></i> Contact</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+  </div><!-- /mc-page -->
 
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Custom JS -->
-    <script src="{% static 'js/medi_clinics/base.js' %}"></script>
-    <script src="{% static 'js/clinic_owners/update_profile.js' %}"></script>
-    <script src="{% static 'js/clinics/clinic_form.js' %}"></script>
-    
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Project JS (existing) -->
+  <script src="{% static 'js/clinic_owners/update_profile.js' %}"></script>
+  <script src="{% static 'js/clinics/clinic_form.js' %}"></script>
+
+  <!-- NEW: base layout JS -->
+  <script src="{% static 'js/medi_clinics/base.js' %}"></script>
+
+  {% block extra_js %}{% endblock %}
+
 </body>
 </html>
