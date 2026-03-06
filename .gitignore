@@ -44,3 +44,6 @@ htmlcov/
 .tox/
 .mypy_cache/
 .pytest_cache/
+
+#Others
+desktop.ini
